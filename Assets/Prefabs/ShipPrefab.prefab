@@ -278,6 +278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 410b3caae6b2fe94b85fee55597ad677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerName: PREFAB
   _cameraAttach: {fileID: 0}
 --- !u!114 &3650542663445798755
 MonoBehaviour:

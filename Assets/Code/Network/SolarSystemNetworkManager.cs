@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -8,7 +9,7 @@ namespace WORLDGAMEDEVELOPMENT
     {
         #region PrivateFields
 
-        private const string PLAYER_NAME_PREF_KEY = "PlayerName";
+        private const string PLAYER_NAME_PREF_KEY = "PlayerNameSolar";
 
         #endregion
 
@@ -16,6 +17,7 @@ namespace WORLDGAMEDEVELOPMENT
         #region Fields
 
         [SerializeField] private string _playerName;
+        public event Action<ShipController> OnPlayerSpawned = delegate {};
 
         #endregion
 
@@ -24,12 +26,21 @@ namespace WORLDGAMEDEVELOPMENT
 
         public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
         {
+            Debug.LogError("K><J");
             var spawnTransform = GetStartPosition();
             var player = Instantiate(playerPrefab, spawnTransform.position, spawnTransform.rotation);
-            player.GetComponent<ShipController>().PlayerName = _playerName;
+            var playerShip =  player.GetComponent<ShipController>();
+            player.name = _playerName;
+            
             NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
+            
+            OnPlayerSpawned?.Invoke(playerShip);
         }
 
+        public override void OnClientConnect(NetworkConnection conn)
+        {
+            base.OnClientConnect(conn);
+        }
         #endregion
     }
 }

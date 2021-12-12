@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine.Networking;
+
 
 namespace WORLDGAMEDEVELOPMENT
 {
@@ -12,7 +8,7 @@ namespace WORLDGAMEDEVELOPMENT
     {
         #region Fields
 
-        [SyncVar] private string _playerName;
+        [SyncVar, SerializeField] private string _playerName;
 
         [SerializeField] private Transform _cameraAttach;
 
@@ -27,11 +23,24 @@ namespace WORLDGAMEDEVELOPMENT
 
         #region Properties
 
-        public string PlayerName { get => _playerName; set => _playerName = value; }
+        public string PlayerName
+        {
+            get => _playerName; 
+            set
+            {
+                _playerName = value;
+            }
+        }
         protected override float Speed => _shipSpeed;
 
         #endregion
 
+
+        [Command]
+        public void CmdSetPlayerName(string name)
+        {
+            PlayerName = name;
+        }
 
         #region Methods
 
@@ -42,7 +51,7 @@ namespace WORLDGAMEDEVELOPMENT
             {
                 return;
             }
-            gameObject.name = PlayerName;
+            gameObject.name = _playerName;
             _cameraOrbit = FindObjectOfType<CameraOrbit>();
             _cameraOrbit.Initiate(_cameraAttach == null ? transform : _cameraAttach);
             _playerLabel = GetComponentInChildren<PlayerLabel>();
@@ -75,6 +84,19 @@ namespace WORLDGAMEDEVELOPMENT
                 var targetRotation = Quaternion.LookRotation(Quaternion.AngleAxis(_cameraOrbit.LookAngle, -transform.right) * velocity);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed);
             }
+        }
+
+        [ClientRpc]
+        public void RpcPlayerNameUpdate()
+        {
+            Invoke(nameof(UpdatePlayerName), 1.0f);
+        }
+
+        public void UpdatePlayerName()
+        {
+            Debug.Log(PlayerName);
+
+            gameObject.name = PlayerName;
         }
 
         protected override void SendToServer()
